@@ -10,12 +10,19 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 
 @ServerEndpoint(value = "/socket/{potId}")
 public class VerdeSocketEndpoint {
 
     private Session session;
     private SessionIdPotId sessionIdPotId;
+    private Map<String, List<String>> potIdMessages = new HashMap();
 
     @OnOpen
     //when the client connects
@@ -32,6 +39,14 @@ public class VerdeSocketEndpoint {
 
     @OnMessage
     public void OnMessage(Session session, String message) throws IOException {
+        List<String> messages = potIdMessages.get(sessionIdPotId.getPotId());
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
+        messages.add(message);
+
+        potIdMessages.put(sessionIdPotId.getPotId(), messages);
+
         System.out.println("Received message:" + message + " [from " + sessionIdPotId.getPotId() + "]");
     }
 
@@ -58,5 +73,12 @@ public class VerdeSocketEndpoint {
 
     }
 
+    public Map<String, List<String>> getPotMessages() {
+        return potIdMessages;
+    }
+
+    public Session getSession() {
+        return session;
+    }
 
 }
