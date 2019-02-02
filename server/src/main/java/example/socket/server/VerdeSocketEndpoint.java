@@ -21,6 +21,8 @@ import java.util.concurrent.Future;
 public class VerdeSocketEndpoint {
 
     private Session session;
+    private CountDownLatch countDownLatch;
+
     private SessionIdPotId sessionIdPotId;
     private Map<String, List<String>> potIdMessages = new HashMap();
 
@@ -52,7 +54,11 @@ public class VerdeSocketEndpoint {
 
         potIdMessages.put(sessionIdPotId.getPotId(), messages);
 
-        System.out.println("Received message:" + message + " [from " + sessionIdPotId.getPotId() + "]");
+        if (countDownLatch != null) {
+            countDownLatch.countDown();
+        }
+
+        System.out.println("Received message: " + message + " [from " + sessionIdPotId.getPotId() + "]");
     }
 
     @OnClose
@@ -63,6 +69,7 @@ public class VerdeSocketEndpoint {
         String potId = sessionIdPotId.getSessionId();
 //        message.setFrom(potId);
 //        message.setContent("Bye " + potId + "!" + "You are disconnected!");
+        //TODO wait?
         sendMessage("Bye " + potId + "!" + "You are disconnected!");
     }
 
@@ -74,12 +81,21 @@ public class VerdeSocketEndpoint {
 
     public void sendMessage(String message) throws IOException {
 
+        System.out.println("Sending message: " + message);
         this.session.getBasicRemote().sendText(message);
 
     }
 
     public Map<String, List<String>> getPotMessages() {
         return potIdMessages;
+    }
+
+    public CountDownLatch getCountDownLatch() {
+        return countDownLatch;
+    }
+
+    public void setCountDownLatch(CountDownLatch countDownLatch) {
+        this.countDownLatch = countDownLatch;
     }
 
     public Session getSession() {
