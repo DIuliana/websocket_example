@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -19,7 +22,21 @@ public class Verde {
         VerdeSocketEndpoint verdeSocketEndpoint = VerdeSocketEndpointContainer.getVerdeSocketEndpointByPotId(potId);
         verdeSocketEndpoint.sendMessage("Give me your status!");
 
-        return  verdeSocketEndpoint.getPotMessages().get(potId).toString();
+
+        //wait for the socket response
+        verdeSocketEndpoint.setCountDownLatch(new CountDownLatch(1));
+        try {
+            verdeSocketEndpoint.getCountDownLatch().await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        List<String> messages = verdeSocketEndpoint.getPotMessages().get(potId);
+        if(messages == null){
+            messages = new ArrayList<>();
+        }
+        return  messages.toString();
     }
 
 
