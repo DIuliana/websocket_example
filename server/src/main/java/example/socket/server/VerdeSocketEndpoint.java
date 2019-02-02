@@ -34,6 +34,11 @@ public class VerdeSocketEndpoint {
 //        Message message = new Message();
 ////        message.setFrom(potId);
 //        message.setContent("Hello " + potId + "!" + "You are connected!");
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+
+        }
         sendMessage("Hello " + potId + "!" + "You are connected!");
     }
 
